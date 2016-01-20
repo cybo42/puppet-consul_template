@@ -66,6 +66,14 @@ class consul_template::config (
     }
   }
 
+  if str2bool($::consul_template::syslog_enabled) {
+    concat::fragment { 'syslog':
+      target  => 'consul-template/config.json',
+      content => inline_template("syslog {\n  enabled = ${::consul_template::syslog_enabled}\n  facility = \"${::consul_template::syslog_facility}\"\n}\n\n"),
+      order   => '08',
+    }
+  }
+
   file { [$consul_template::config_dir, "${consul_template::config_dir}/config"]:
     ensure  => 'directory',
     purge   => $purge,

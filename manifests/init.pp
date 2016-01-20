@@ -103,6 +103,8 @@ class consul_template (
   $vault_ssl_verify   = true,
   $vault_ssl_cert     = '',
   $vault_ssl_ca_cert  = '',
+  $syslog_enabled     = false,
+  $syslog_facility    = 'LOCAL0',
   $data_dir           = '',
   $user               = $consul_template::params::user,
   $group              = $consul_template::params::group,
@@ -136,11 +138,13 @@ class consul_template (
   class { '::consul_template::service': } ->
   anchor { '::consul_template::end': }
 
-  class { '::consul_template::logrotate':
-    logrotate_compress => $logrotate_compress,
-    logrotate_files    => $logrotate_files,
-    logrotate_on       => $logrotate_on,
-    logrotate_period   => $logrotate_period,
-    before             => Anchor['::consul_template::end'],
+  if !str2bool($syslog_enabled) {
+    class { '::consul_template::logrotate':
+      logrotate_compress => $logrotate_compress,
+      logrotate_files    => $logrotate_files,
+      logrotate_on       => $logrotate_on,
+      logrotate_period   => $logrotate_period,
+      before             => Anchor['::consul_template::end'],
+    }
   }
 }
